@@ -37,8 +37,8 @@ namespace PicasaReview
     class Program
     {
         static string wikiSiteUrl = "http://commons.wikimedia.org";
-        static string username = "Picasa Review Bot";
-        static string password = "tRbtfNR7Fs/z4M";
+        static string username;
+        static string password;
 
         //static string catScanning = null;
         static string catScanning = "Category:Picasa_Web_Albums_review_needed";
@@ -55,6 +55,9 @@ namespace PicasaReview
 
         static void Main(string[] args)
         {
+            username = args[0];
+            password = args[1];
+
             Bot.unsafeHttpHeaderParsingUsed = 0;
             Site site = new Site(wikiSiteUrl, username, password);
             while (true)
