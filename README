@@ -1,0 +1,13 @@
+User:Picasa Review Bot on Wikimedia Commons was created to assist in reviewing the licenses of contributions from Picasa Web Albums. It goes over the images in Category:Picasa Web Albums review needed and marks them as reviewed if the license and the image file exactly match the full-size image from Picasa. Other images are left in that category for humans to review. An image may not be reviewed if the license does not match or if a thumbnail was uploaded.
+
+http://commons.wikimedia.org/wiki/User:Picasa_Review_Bot
+
+Written in C#, tested only on Windows, not on Mono. Runs currently on a server at my (User:Dcoetzee's) house.
+
+Uses a modified version of DotNetWikiBot, from:
+
+http://dotnetwikibot.sourceforge.net/
+
+License:
+MIT/X11 License
+http://www.opensource.org/licenses/mit-license.php
