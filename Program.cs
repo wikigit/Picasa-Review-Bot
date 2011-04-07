@@ -137,6 +137,12 @@ namespace PicasaReview
                                         if (HasOtrsTag(page) || IsFlickrReviewed(page)) continue;
                                     }
 
+                                    if (!page.title.ToLower().EndsWith(".jpg") && !page.title.ToLower().EndsWith(".png") && !page.title.ToLower().EndsWith(".tiff"))
+                                    {
+                                        failureReason = "can only review image files, not other file types";
+                                        continue;
+                                    }
+
                                     if (!FetchPicasaImageInfo(page, out licenseName, out mediaUrl))
                                     {
                                         failureReason = "could not retrieve image information from Picasa";
