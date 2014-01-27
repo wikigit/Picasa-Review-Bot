@@ -1,4 +1,4 @@
-﻿/* Copyright (c) 2010 Derrick Coetzee
+/* Copyright (c) 2010 Derrick Coetzee
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -36,7 +36,7 @@ namespace PicasaReview
 {
     class Program
     {
-        static string wikiSiteUrl = "http://commons.wikimedia.org";
+        static string wikiSiteUrl = "https://commons.wikimedia.org";
         static string username;
         static string password;
 
@@ -545,27 +545,70 @@ namespace PicasaReview
         static Regex mediaUrlRegex = new Regex("media:content url='([^']+)'");
         static Regex summaryTextRegex = new Regex("<summary type='text'>([^<]*)</summary>");
 
+        static Regex picasaUrlRegex2 = new Regex("https?://picasaweb\\.google(\\.[\\.a-z]+)/lh/photo/.+", RegexOptions.IgnoreCase);
+        static Regex IdRegex2 = new Regex(",\"href\":\"https?://picasaweb\\.google\\.[\\.a-z]+/data/feed/tiny/user/([0-9]+)/photoid/([0-9]+)\\?");
+
         private static bool FetchPicasaImageInfo(Page page, out string licenseName, out string mediaUrl)
         {
             licenseName = mediaUrl = null;
 
             Match m;
             m = picasaUrlRegex.Match(page.text);
+
+            string url;
+            string picasaImagePage;
+            string albumId;
+            string userId;
+            string photoId;
+            string summary;
+
             if (!m.Success)
             {
                 UpdateSourceField(page);
                 m = picasaUrlRegex.Match(page.text);
                 if (!m.Success)
                 {
-                    return false;
+                    m = picasaUrlRegex2.Match(page.text);
+                    if (!m.Success)
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        url = m.Groups[0].ToString();
+                        url = url.Replace(m.Groups[1].ToString(), ".com"); // Use English version
+
+                        picasaImagePage = WgetToString(url);
+                        if (picasaImagePage == null) return false;
+                        m = albumIdRegex.Match(picasaImagePage);
+                        if (!m.Success)
+                        {
+                            m = new Regex("var _album = {id:'([0-9]+)'").Match(picasaImagePage);
+                            if (!m.Success)
+                            {
+                                return false;
+                            }
+                        }
+                        albumId = m.Groups[1].ToString();
+
+                        m = IdRegex2.Match(picasaImagePage);
+                        if (!m.Success)
+                        {
+                            return false;
+                        }
+                        userId = m.Groups[1].ToString();
+                        photoId = m.Groups[2].ToString();
+
+                        return GetImageInfo(userId, albumId, photoId, out licenseName, out mediaUrl, out summary);
+                    }
                 }
             }
-            string url = m.Groups[0].ToString();
+            url = m.Groups[0].ToString();
             url = url.Replace(m.Groups[1].ToString(), ".com"); // Use English version
-            string userId = m.Groups[2].ToString();
-            string photoId = m.Groups[3].ToString();
+            userId = m.Groups[2].ToString();
+            photoId = m.Groups[3].ToString();
 
-            string picasaImagePage = WgetToString(url);
+            picasaImagePage = WgetToString(url);
             if (picasaImagePage == null) return false;
             m = albumIdRegex.Match(picasaImagePage);
             if (!m.Success)
@@ -576,9 +619,8 @@ namespace PicasaReview
                     return false;
                 }
             }
-            string albumId = m.Groups[1].ToString();
+            albumId = m.Groups[1].ToString();
 
-            string summary;
             return GetImageInfo(userId, albumId, photoId, out licenseName, out mediaUrl, out summary);
         }
 
